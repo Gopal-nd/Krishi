@@ -14,6 +14,7 @@ import pioneer from '../assets/pioneer.webp'
 import { ModeToggle } from "@/components/ThemeToggle"
 
 export default function LandingPage() {
+
   return (
     <div className="flex flex-col min-h-screen max-w-7xl mx-auto ">
       <header className="px-4 lg:px-6 h-14 flex items-center  border-b py-4">
@@ -22,7 +23,9 @@ export default function LandingPage() {
         </Link>
         <div className="ml-auto flex item-center gap-4 ">
         <ModeToggle />
+        <Link href={'/login'}>
           <Button >Login</Button>
+        </Link>
         </div>
       </header>
       <main className="flex-1">
