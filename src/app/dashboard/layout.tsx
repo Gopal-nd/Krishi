@@ -1,95 +1,109 @@
-'use client';
-import NavbarProfile from '@/components/NavbarProfile';
-import { Wheat } from 'lucide-react';
-import { useSession } from 'next-auth/react';
-import Link from 'next/link';
-import { useRouter } from 'next/navigation';
-import React, { useState } from 'react';
+"use client"
 
-export default function Component({ children }: { children: React.ReactNode }) {
-  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
-  const router = useRouter();
-  const user = useSession();
-  if (!user) return router.push('/login');
-  
+import { useState, useEffect } from "react"
+import { useMediaQuery } from "react-responsive"
+import Link from "next/link"
+import { Button } from "@/components/ui/button"
+import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet"
+import { Menu, X, Cloud, MessageSquare, BookOpen, Image as ImageIcon, ShoppingBag, Home, ChevronLeft, ChevronRight, Wheat } from "lucide-react"
+import NavbarProfile from "@/components/NavbarProfile"
+
+
+
+export default function Component({children}:{children:React.ReactNode}) {
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false)
+  const isLargeScreen = useMediaQuery({ query: "(min-width: 1024px)" })
+
+  useEffect(() => {
+    setIsSidebarOpen(isLargeScreen)
+  }, [isLargeScreen])
+
   const toggleSidebar = () => {
-    setIsSidebarOpen(!isSidebarOpen);
-  };
+    setIsSidebarOpen(!isSidebarOpen)
+  }
 
-  const menuItems = [
-    { href: '#', label: 'Home' },
-  ];
+  const SidebarContent = () => (
+    <nav className="space-y-2">
+      <Link href="/" className="flex items-center space-x-2 px-4 py-2  rounded-lg">
+        <Home className="h-5 w-5" />
+        <span>Home</span>
+      </Link>
+      <Link href="/weather" className="flex items-center space-x-2 px-4 py-2  rounded-lg">
+        <Cloud className="h-5 w-5" />
+        <span>Weather</span>
+      </Link>
+      <Link href="/ai-chat" className="flex items-center space-x-2 px-4 py-2  rounded-lg">
+        <MessageSquare className="h-5 w-5" />
+        <span>AI Chat</span>
+      </Link>
+      <Link href="/tutorial" className="flex items-center space-x-2 px-4 py-2  rounded-lg">
+        <BookOpen className="h-5 w-5" />
+        <span>Tutorial</span>
+      </Link>
+      <Link href="/image-recognition" className="flex items-center space-x-2 px-4 py-2  rounded-lg">
+        <ImageIcon className="h-5 w-5" />
+        <span>Image Recognition</span>
+      </Link>
+      <Link href="/marketplace" className="flex items-center space-x-2 px-4 py-2  rounded-lg">
+        <ShoppingBag className="h-5 w-5" />
+        <span>Marketplace</span>
+      </Link>
+    </nav>
+  )
 
   return (
-    <div className="flex h-screen">
-      {/* Sidebar   change css here  */}
-      <aside
-        className={`fixed inset-y-0 left-0 z-30 w-64 border-r transform 
-            transition-transform duration-300 ease-in-out lg:translate-x-0 ${
-              isSidebarOpen ?' dark:bg-white dark:text-black text-white bg-customBackground translate-x-0' : '-translate-x-full'
-            }`}
-      >
-        <div className="flex items-center justify-between h-10 px-6 py-2 border-b">
-          <Link href={"/dashboard"} className="flex gap-1 items-center">
-            <Wheat />
-            <p className="text-lg font-medium md:flex">Krishi</p>
-          </Link>
-          <button onClick={toggleSidebar} className="lg:hidden">
-            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" className="h-6 w-6">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-            </svg>
-          </button>
-        </div>
-        <nav className="mt-6">
-          {menuItems.map((item) => (
-            <a
-              key={item.href}
-              href={item.href}
-              className="flex items-center px-6 py-3 "
+    <div className="min-h-screen max-w-7xl mx-auto ">
+      <header className="flex items-center justify-between p-2  border-b">
+        <div className="flex gap-10">
+        <Link href="/dashboard" className="flex items-center space-x-2">
+          <Wheat className="h-6 w-6" />
+          <span className="text-xl font-bold">Krishi</span>
+        </Link>
+        {isLargeScreen && (
+            <Button
+            size="icon"
+            onClick={toggleSidebar}
+            aria-label={isSidebarOpen ? "Close sidebar" : "Open sidebar"}
             >
-              {item.label}
-            </a>
-          ))}
-        </nav>
-      </aside>
-
-      {/* Main content */}
-      <div className="flex-1 lg:ml-64  items-center">
-        {/* Top bar for mobile */}
-        <header className="flex items-center justify-between h-10 py-2 px-6 border-b lg:hidden">
-          <Link href={"/dashboard"} className="flex gap-1 items-center">
-            <Wheat />
-            <p className="text-lg font-medium md:flex">Krishi</p>
-          </Link>
-          <div className='flex justify-end gap-4'>
-            <button onClick={toggleSidebar}>
-              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" className="h-6 w-6">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
-              </svg>
-            </button>
-          
-
-            <NavbarProfile />
-            
+              {isSidebarOpen ? <ChevronLeft className="h-5 w-5" /> : <ChevronRight className="h-5 w-5" />}
+            </Button>
+          )}
           </div>
-        </header>
-
-        {/* Main content */}
-        <div className='hidden lg:block border-b h-10 overflow-hidden '>
-          <NavbarProfile />
+        <div className="flex items-center space-x-4">
+        <NavbarProfile />
+          {!isLargeScreen && (
+            <Sheet open={isSidebarOpen} onOpenChange={setIsSidebarOpen}>
+              <SheetTrigger asChild>
+                <Button variant="ghost" size="icon" onClick={toggleSidebar}>
+                  {isSidebarOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
+                </Button>
+              </SheetTrigger>
+              <SheetContent side="left" className="w-64">
+                <SidebarContent />
+              </SheetContent>
+            </Sheet>
+          )}
         </div>
-        <div className='p-2'>
-          {children}
-        </div>
+      </header>
+      <div className="flex">
+        {isLargeScreen && (
+          <aside
+            className={`transition-all duration-300 ease-in-out ${
+              isSidebarOpen ? "w-64" : "w-0"
+            }`}
+          >
+            <div
+             className={`h-[calc(100vh-65px)] p-4  overflow-hidden ${
+                isSidebarOpen ? "border-r" : ""
+              }`}>
+              <SidebarContent />
+            </div>
+          </aside>
+        )}
+        <main className="flex-1 p-4">
+       {children}
+        </main>
       </div>
-
-      {/* Overlay for mobile when sidebar is open */}
-      {isSidebarOpen && (
-        <div
-          className="fixed inset-0 bg-black bg-opacity-50 lg:hidden" // Changed to black with opacity for better visibility
-          onClick={toggleSidebar}
-        ></div>
-      )}
     </div>
-  );
+  )
 }
