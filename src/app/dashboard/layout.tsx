@@ -5,7 +5,7 @@ import { useMediaQuery } from "react-responsive"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet"
-import { Menu, X, Cloud, MessageSquare, BookOpen, Image as ImageIcon, ShoppingBag, Home, ChevronLeft, ChevronRight, Wheat } from "lucide-react"
+import { Menu, X, Cloud, MessageSquare, BookOpen, Image as ImageIcon, ShoppingBag, Home, ChevronLeft, ChevronRight, Wheat, HistoryIcon } from "lucide-react"
 import NavbarProfile from "@/components/NavbarProfile"
 
 
@@ -23,16 +23,17 @@ export default function Component({children}:{children:React.ReactNode}) {
   }
 
   const SidebarContent = () => (
-    <nav className="space-y-2">
-      <Link href="/" className="flex items-center space-x-2 px-4 py-2  rounded-lg">
+    <nav className="space-y-2 flex flex-col h-full justify-between items-satrt">
+      <div>
+      <Link href="/dashboard" className="flex items-center space-x-2 px-4 py-2  rounded-lg">
         <Home className="h-5 w-5" />
         <span>Home</span>
       </Link>
-      <Link href="/weather" className="flex items-center space-x-2 px-4 py-2  rounded-lg">
+      <Link href="/dashboard/weather" className="flex items-center space-x-2 px-4 py-2  rounded-lg">
         <Cloud className="h-5 w-5" />
         <span>Weather</span>
       </Link>
-      <Link href="/ai-chat" className="flex items-center space-x-2 px-4 py-2  rounded-lg">
+      <Link href="/dashboard/ai-chat" className="flex items-center space-x-2 px-4 py-2  rounded-lg">
         <MessageSquare className="h-5 w-5" />
         <span>AI Chat</span>
       </Link>
@@ -48,6 +49,10 @@ export default function Component({children}:{children:React.ReactNode}) {
         <ShoppingBag className="h-5 w-5" />
         <span>Marketplace</span>
       </Link>
+      </div>
+      <div className="flex  items-start">
+        <div className="flex items-center space-x-2 px-4 py-2  rounded-lg"><HistoryIcon className="h-5"/><span>History</span> </div>
+      </div>
     </nav>
   )
 
