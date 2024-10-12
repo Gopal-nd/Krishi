@@ -9,6 +9,13 @@ const config: Config = {
   ],
   theme: {
   	extend: {
+		scrollbarHide: {
+			'&::-webkit-scrollbar': {
+			  display: 'none',
+			},
+			'-ms-overflow-style': 'none', /* IE and Edge */
+			'scrollbar-width': 'none', 
+		},
   		colors: {
   			background: 'hsl(var(--background))',
   			foreground: 'hsl(var(--foreground))',

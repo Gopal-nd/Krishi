@@ -6,9 +6,10 @@ import React, { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import axios from 'axios'
 import { useQuery } from '@tanstack/react-query'
-import Loader from '@/components/weather/loader'
-import { WeatherData } from '@/types/weather'
+import Loader from '@/components/weather/Loader'
+import { WeatherData, WeatherDataHour } from '@/types/weather'
 import WeatherComponent from '@/components/weather/detailsToday'
+import HourlyWeatherData from '@/components/weather/Hourlydata'
 interface Location {
     latitude: number | null;
     longitude: number | null;
@@ -48,12 +49,30 @@ const page = () => {
         return data;
       };
 
+      const fetchWeatherHourlydata = async (latitude: number, longitude: number) => {
+
+          const {data,status} = await axios.get(
+            `https://api.openweathermap.org/data/2.5/forecast?lat=${latitude}&lon=${longitude}&appid=${process.env.NEXT_PUBLIC_WEATHER_API}&units=metric`
+          );
+          // Get all the data for the next 96 hours
+          console.log(data.list)
+          if (status!==200) {
+            throw new Error('Failed to fetch location data');
+          }
+          return data.list;
+      };
 
       const { data, isLoading, isError, error: queryError } = useQuery<WeatherData>({
         queryKey:["location"],
         queryFn:()=>fetchLocationData(location.latitude!, location.longitude!),
      
       })
+      const { data:Hourdata, isLoading:HourLoading, isError:HourisError, error: queryErrorHour } = useQuery<WeatherDataHour[]>({
+        queryKey:["Hourly"],
+        queryFn:()=>fetchWeatherHourlydata(location.latitude!, location.longitude!),
+     
+      })
+
 
     useEffect(() => {
         GetUserGeoLocation()
@@ -101,6 +120,11 @@ const page = () => {
         <div className='w-[90%] mx-auto'>
           <WeatherComponent weatherData={data} />
         </div>}
+        {Hourdata &&
+        <div className='w-[90%] mx-auto'>
+          <HourlyWeatherData HourlyWeatherData={Hourdata} />
+        </div>}
+
     </div>
   )
 }

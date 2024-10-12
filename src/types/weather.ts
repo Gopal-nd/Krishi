@@ -72,3 +72,64 @@ export interface WeatherData {
     name: 'Province of Turin',
     cod: 200,
   };
+
+
+// WeatherData interface represents the individual weather data for each timestamp
+export interface WeatherDataHour {
+  dt: number; // UNIX timestamp
+  dt_txt: string; // Date and time in the format "YYYY-MM-DD HH:mm:ss"
+  main: {
+    temp: number; // Temperature in Celsius
+    feels_like: number; // "Feels like" temperature
+    temp_min: number; // Minimum temperature
+    temp_max: number; // Maximum temperature
+    pressure: number; // Atmospheric pressure in hPa
+    sea_level: number; // Atmospheric pressure at sea level
+    grnd_level: number; // Atmospheric pressure at ground level
+    humidity: number; // Humidity percentage
+    temp_kf: number; // Temperature coefficient (unused in most cases)
+  };
+  weather: {
+    id: number; // Weather condition id
+    main: string; // Weather condition (e.g., "Rain")
+    description: string; // Weather condition description (e.g., "moderate rain")
+    icon: string; // Weather icon code
+  }[];
+  clouds: {
+    all: number; // Cloudiness percentage
+  };
+  wind: {
+    speed: number; // Wind speed in meters/second
+    deg: number; // Wind direction in degrees
+    gust?: number; // Wind gust speed (optional)
+  };
+  visibility: number; // Visibility in meters
+  pop: number; // Probability of precipitation (0 to 1)
+  rain?: {
+    "3h": number; // Rain volume for the last 3 hours (optional)
+  };
+  sys: {
+    pod: string; // Part of the day ("d" for day, "n" for night)
+  };
+}
+
+// WeatherResponse interface represents the overall API response
+// interface WeatherResponse {
+//   cod: string; // Response code
+//   message: number; // Message from the API
+//   cnt: number; // Number of entries returned
+//   list: WeatherData[]; // List of weather data for each timestamp
+//   city: {
+//     id: number; // City ID
+//     name: string; // City name
+//     coord: {
+//       lat: number; // Latitude
+//       lon: number; // Longitude
+//     };
+//     country: string; // Country code
+//     population: number; // Population of the city
+//     timezone: number; // Timezone offset in seconds
+//     sunrise: number; // Sunrise time (UNIX timestamp)
+//     sunset: number; // Sunset time (UNIX timestamp)
+//   };
+// }
