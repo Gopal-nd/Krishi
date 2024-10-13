@@ -7,7 +7,7 @@ import { WeatherDataHour } from '@/types/weather';
 
 
 const HourlyWeatherData: React.FC<{HourlyWeatherData:WeatherDataHour[]}> = ({HourlyWeatherData}) => {
-  // console.log(HourlyWeatherData)
+  console.log('hourly data is ',HourlyWeatherData)
     const weatherData = HourlyWeatherData;
     
 
@@ -18,7 +18,7 @@ const HourlyWeatherData: React.FC<{HourlyWeatherData:WeatherDataHour[]}> = ({Hou
     {/* {error && <p className="text-red-500">{error}</p>} */}
     <div className="overflow-x-auto space-y-4 scrollbar-hide ">
       <div className="flex flex-row space-x-4">
-        {weatherData.map((data, index) => (
+        {weatherData && weatherData.map((data, index) => (
           <div
             key={index}
             className="min-w-[180px] p-4 bg rounded-lg shadow text-center"

@@ -1,5 +1,5 @@
 export interface WeatherData {
-    coord: {
+    coord?: {
       lon: number;
       lat: number;
     };
@@ -113,23 +113,37 @@ export interface WeatherDataHour {
   };
 }
 
-// WeatherResponse interface represents the overall API response
-// interface WeatherResponse {
-//   cod: string; // Response code
-//   message: number; // Message from the API
-//   cnt: number; // Number of entries returned
-//   list: WeatherData[]; // List of weather data for each timestamp
-//   city: {
-//     id: number; // City ID
-//     name: string; // City name
-//     coord: {
-//       lat: number; // Latitude
-//       lon: number; // Longitude
-//     };
-//     country: string; // Country code
-//     population: number; // Population of the city
-//     timezone: number; // Timezone offset in seconds
-//     sunrise: number; // Sunrise time (UNIX timestamp)
-//     sunset: number; // Sunset time (UNIX timestamp)
-//   };
-// }
+
+export interface DailyWeatherData {
+  dt: number;
+  sunrise: number;
+  sunset: number;
+  temp: {
+    day: number;
+    min: number;
+    max: number;
+    night: number;
+    eve: number;
+    morn: number;
+  };
+  feels_like: {
+    day: number;
+    night: number;
+    eve: number;
+    morn: number;
+  };
+  pressure: number;
+  humidity: number;
+  weather: Array<{
+    id: number;
+    main: string;
+    description: string;
+    icon: string;
+  }>;
+  speed: number;
+  deg: number;
+  gust: number;
+  clouds: number;
+  pop: number;
+  rain: number;
+}
