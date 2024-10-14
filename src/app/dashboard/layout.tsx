@@ -43,15 +43,15 @@ export default function Component({ children }: { children: React.ReactNode }) {
           <MessageSquare className="h-5 w-5" />
           <span>AI Chat</span>
         </Link>
-        <Link href="/tutorial" className="flex items-center space-x-2 px-4 py-2 rounded-lg" onClick={handleLinkClick}>
+        <Link href="/dashboard/tutorial" className="flex items-center space-x-2 px-4 py-2 rounded-lg" onClick={handleLinkClick}>
           <BookOpen className="h-5 w-5" />
           <span>Tutorial</span>
         </Link>
-        <Link href="/image-recognition" className="flex items-center space-x-2 px-4 py-2 rounded-lg" onClick={handleLinkClick}>
+        <Link href="/dashboard/image-recognition" className="flex items-center space-x-2 px-4 py-2 rounded-lg" onClick={handleLinkClick}>
           <ImageIcon className="h-5 w-5" />
-          <span>Image Recognition</span>
+          <span>Image Lens</span>
         </Link>
-        <Link href="/marketplace" className="flex items-center space-x-2 px-4 py-2 rounded-lg" onClick={handleLinkClick}>
+        <Link href="/dashboard/marketplace" className="flex items-center space-x-2 px-4 py-2 rounded-lg" onClick={handleLinkClick}>
           <ShoppingBag className="h-5 w-5" />
           <span>Marketplace</span>
         </Link>

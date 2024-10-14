@@ -1,9 +1,9 @@
 import React from 'react'
 
-const page = () => {
+const AIchat = () => {
   return (
-    <div>page</div>
+    <div>AIchat</div>
   )
 }
 
-export default page
+export default AIchat

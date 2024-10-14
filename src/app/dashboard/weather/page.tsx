@@ -205,30 +205,39 @@ const Page = () => {
         </div>
       )}
       {PlaceLoading && <p className='text-center text-xl p-4'>Place data is loading...</p>}
+{    !place &&(<>
       {Placedata && (
         <div className='w-[90%] mx-auto'>
           
           <WeatherComponent weatherData={ Placedata} />
         </div>
       )}
-      {HourLoading && <p className='text-center text-xl p-4'>Hourly data is loading...</p>}
-      {Hourdata && (
-        <div className='w-[90%] mx-auto'>
-          <HourlyWeatherData HourlyWeatherData={place ? PlaceHourdata! : Hourdata} />
+</>)  
+} 
+     {HourLoading && <p className='text-center text-xl p-4'>Hourly data is loading...</p>}
+   { !place && (<>
+    {Hourdata && (
+      <div className='w-[90%] mx-auto'>
+          <HourlyWeatherData HourlyWeatherData={Hourdata} />
         </div>
       )}
+      </>) 
+      }
       {PlaceHourdata && (
         <div className='w-[90%] mx-auto'>
           <HourlyWeatherData HourlyWeatherData={PlaceHourdata} />
         </div>
       )}
 
-
+{!place &&(<>
       {(Hourdata || data) && (
         <div className='w-[90%] mx-auto'>
           <DailyForecast />
         </div>
       )}
+      </>)
+      
+      }
       {( PlaceHourdata|| Placedata) && (
         <div className='w-[90%] mx-auto'>
           <DailyForecast />
