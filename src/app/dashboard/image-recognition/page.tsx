@@ -1,9 +1,326 @@
-import React from 'react'
+'use client'
 
-const ImageLens = () => {
+import { Input } from '@/components/ui/input';
+import { useMutation } from '@tanstack/react-query';
+import { useState, useRef } from 'react';
+import { ImageIcon } from 'lucide-react';
+import axios from 'axios';
+
+const ImageRecognitionPage = () => {
+  const [selectedImage, setSelectedImage] = useState<File | null>(null);
+  const [prompt, setPrompt] = useState<string>('');
+  const [Toggle, setToggle] = useState<boolean>(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      setSelectedImage(file);
+    }
+  };
+
+  const removeImage = () => {
+    setSelectedImage(null);
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
+    }
+  };
+
+  const handleIconClick = () => {
+    fileInputRef.current?.click();
+  };
+
+  const { mutate,data:AIresponse, isError, isSuccess, isPending, error } = useMutation({
+    mutationKey: ['image'],
+    mutationFn: async (formData: FormData) => {
+      const data = await axios.post('/api/image-lens', formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      });
+      return data;
+    },
+  });
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!selectedImage) {
+      alert('Please upload an image.');
+      return;
+    }
+
+    const formData = new FormData();
+    formData.append('image', selectedImage);
+    formData.append('text',Toggle? prompt: 'if it is a image of any plant or the tree or leves, look for the health of that ,if any defect or disease, give a 100 character of description and suggest the medicines are other ways to treat the disease ,and finaly write some words about the plant and crop irrigation and farming in simple words ..., if not any plant or tree or related to farming , then write a description of the image in 200 characters .');
+
+    mutate(formData);
+  };
+
+  if (isError) {
+    console.log(error);
+  }
+  // if (AIresponse?.status !== 200) {
+  //   alert(AIresponse?.data?.error);
+  // }
+  if (AIresponse?.status === 300) {
+    alert(AIresponse?.data?.error);
+  }
   return (
-    <div>ImageLens</div>
-  )
-}
+    <div className='space-y-6'>
+      <h1 className='text-2xl font-semibold text-center'>
+        Select Image for Recognition  
+      </h1>
+      <div className='max-w-3xl mx-auto'>
+        <form onSubmit={handleSubmit} className="space-y-6">
+          <div>
+            <label className="block font-semibold mb-2">Upload an Image</label>
+            {!selectedImage ? (
+              <div
+                onClick={handleIconClick}
+                className="flex flex-col items-center justify-center w-full h-64 border-2 border-dashed border-gray-300 rounded-lg cursor-pointer"
+              >
+                <ImageIcon className="text-gray-400 text-6xl mb-2" />
+                <p className="text-gray-500">Choose an image</p>
+                <Input
+                  ref={fileInputRef}
+                  type="file"
+                  accept="image/*"
+                  onChange={handleImageChange}
+                  className="hidden"
+                  required
+                />
+              </div>
+            ) : (
+              <div className="relative">
+                <img
+                  src={URL.createObjectURL(selectedImage)}
+                  alt="Selected"
+                  className="w-full max-w-xs h-64 object-cover rounded-lg cursor-pointer"
+                  style={{ maxWidth: '500px', maxHeight: '500px' }}
+                  onClick={handleIconClick}
+                />
+                <button
+                  type="button"
+                  onClick={removeImage}
+                  className="absolute bottom-2 left-2 bg-red-500 text-white p-1 rounded-md"
+                >
+                  Remove
+                </button>
+              </div>
+            )}
+          </div>
 
-export default ImageLens
+          <div>
+          <div className="flex items-center mb-2">
+            <input
+              id="toggle"
+              type="checkbox"
+              className="mr-2 size-5"
+              checked={Toggle}
+              onChange={(e) => setToggle(e.target.checked)}
+            />
+            <label htmlFor="toggle" className="text-lg">
+              Write Custom Prompt
+            </label>
+          </div>
+        { Toggle && <>
+       <label className="block font-semibold mb-2">Optional Prompt</label>
+            <Input
+              type="text"
+              value={prompt}
+              onChange={(e) => setPrompt(e.target.value)}
+              placeholder="Describe the content or provide additional info..."
+              className="block w-full p-2 border border-gray-300 rounded-lg"
+            />
+              </> }
+
+          </div>
+
+          <div>
+            <button
+              type="submit"
+              className={`w-full p-3 rounded-lg bg-blue-500 text-white font-bold ${
+                isPending ? 'opacity-50 cursor-not-allowed' : 'hover:bg-blue-600'
+              }`}
+              disabled={isPending}
+            >
+              {isPending ? 'Processing...' : 'Analyze Image'}
+            </button>
+          </div>
+
+          {isError && (
+            <p className="mt-4 text-red-500 text-center">Error: {error.message}</p>
+          )}
+          {isSuccess && (
+           <div className="mt-6 p-4  rounded-lg">
+           <h2 className="text-xl font-semibold mb-2">AI Analysis:</h2>
+           <p className="whitespace-pre-wrap">{AIresponse.data.aiResponse}</p>
+         </div>
+          )}
+        </form>
+      </div>
+    </div>
+  );
+};
+
+export default ImageRecognitionPage;
+
+
+
+
+
+// 'use client'
+// import { Input } from '@/components/ui/input';
+// import { useState, useRef } from 'react';
+// import { ImageIcon } from 'lucide-react';
+
+// const ImageRecognitionPage = () => {
+//   const [selectedImage, setSelectedImage] = useState<File | null>(null);
+//   const [prompt, setPrompt] = useState<string>('');
+//   const [isLoading, setIsLoading] = useState<boolean>(false);
+//   const [message, setMessage] = useState<string>('');
+//   const [aiResponse, setAiResponse] = useState<string>('');
+//   const fileInputRef = useRef<HTMLInputElement>(null);
+
+//   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+//     const file = e.target.files?.[0];
+//     if (file) {
+//       setSelectedImage(file);
+//     }
+//   };
+
+//   const removeImage = () => {
+//     setSelectedImage(null);
+//     if (fileInputRef.current) {
+//       fileInputRef.current.value = '';
+//     }
+//   };
+
+//   const handleIconClick = () => {
+//     fileInputRef.current?.click();
+//   };
+
+//   const handleSubmit = async (e: React.FormEvent) => {
+//     e.preventDefault();
+//     if (!selectedImage) {
+//       setMessage('Please upload an image.');
+//       return;
+//     }
+
+//     setIsLoading(true);
+//     setMessage('');
+//     setAiResponse('');
+
+//     const formData = new FormData();
+//     formData.append('image', selectedImage);
+//     formData.append('text', prompt || 'Describe this image in detail.');
+
+//     try {
+//       const response = await fetch('/api/image-lens', {
+//         method: 'POST',
+//         body: formData,
+//       });
+
+//       const data = await response.json();
+
+//       if (response.ok) {
+//         setMessage('Image processed successfully!');
+//         setAiResponse(data.aiResponse);
+//       } else {
+//         setMessage(`Error: ${data.error || 'Something went wrong'}`);
+//       }
+//     } catch (error) {
+//       setMessage(`Error: ${(error as Error).message}`);
+//     } finally {
+//       setIsLoading(false);
+//     }
+//   };
+
+//   return (
+//     <div className='space-y-6'>
+//       <h1 className='text-2xl font-semibold text-center'>
+//         Image Recognition with AI
+//       </h1>
+//       <div className='max-w-3xl mx-auto'>
+//         <form onSubmit={handleSubmit} className="space-y-6">
+//           <div>
+//             <label className="block font-semibold mb-2">Upload an Image</label>
+//             {!selectedImage ? (
+//               <div
+//                 onClick={handleIconClick}
+//                 className="flex flex-col items-center justify-center w-full h-64 border-2 border-dashed border-gray-300 rounded-lg cursor-pointer"
+//               >
+//                 <ImageIcon className="text-gray-400 text-6xl mb-2" />
+//                 <p className="text-gray-500">Choose an image</p>
+//                 <Input
+//                   ref={fileInputRef}
+//                   type="file"
+//                   accept="image/*"
+//                   onChange={handleImageChange}
+//                   className="hidden"
+//                 />
+//               </div>
+//             ) : (
+//               <div className="relative">
+//                 <img
+//                   src={URL.createObjectURL(selectedImage)}
+//                   alt="Selected"
+//                   className="w-full max-w-xs h-64 object-cover rounded-lg cursor-pointer"
+//                   style={{ maxWidth: '500px', maxHeight: '500px' }}
+//                   onClick={handleIconClick}
+//                 />
+//                 <button
+//                   type="button"
+//                   onClick={removeImage}
+//                   className="absolute bottom-2 left-2 bg-red-500 text-white p-1 rounded-md"
+//                 >
+//                   Remove
+//                 </button>
+//               </div>
+//             )}
+//           </div>
+
+//           <div>
+//             <label className="block font-semibold mb-2">Optional Prompt (or leave blank for default description)</label>
+//             <Input
+//               type="text"
+//               value={prompt}
+//               onChange={(e) => setPrompt(e.target.value)}
+//               placeholder="E.g., Describe the main elements in this image"
+//               className="block w-full p-2 border border-gray-300 rounded-lg"
+//             />
+//           </div>
+
+//           <div>
+//             <button
+//               type="submit"
+//               className={`w-full p-3 rounded-lg bg-blue-500 text-white font-bold ${
+//                 isLoading ? 'opacity-50 cursor-not-allowed' : 'hover:bg-blue-600'
+//               }`}
+//               disabled={isLoading}
+//             >
+//               {isLoading ? 'Processing...' : 'Analyze Image'}
+//             </button>
+//           </div>
+
+//           {message && (
+//             <p className={`mt-4 text-center ${
+//               message.includes('successfully') ? 'text-green-600' : 'text-red-600'
+//             }`}>
+//               {message}
+//             </p>
+//           )}
+
+//           {aiResponse && (
+//             <div className="mt-6 p-4 bg-gray-100 rounded-lg">
+//               <h2 className="text-xl font-semibold mb-2">AI Analysis:</h2>
+//               <p className="whitespace-pre-wrap">{aiResponse}</p>
+//             </div>
+//           )}
+//         </form>
+//       </div>
+//     </div>
+//   );
+// };
+
+// export default ImageRecognitionPage;

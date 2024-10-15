@@ -5,7 +5,13 @@ const nextConfig = {
     },
     images:{
         domains:['lh3.googleusercontent.com']
-    }
+    },
+    webpack: (config, { isServer }) => {
+        config.watchOptions = {
+          ignored: /public/
+        }
+        return config
+      },
 };
 
 export default nextConfig;
