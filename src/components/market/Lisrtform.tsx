@@ -1,102 +1,154 @@
 'use client'
-import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
-import { useState } from 'react';
 
-interface ListItemFormProps {}
+import { useState } from 'react'
+import { useMutation } from '@tanstack/react-query'
+import axios from 'axios'
+import { useRouter } from 'next/navigation'
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
+import { Input } from "@/components/ui/input"
+import { Button } from "@/components/ui/button"
+import { Textarea } from "@/components/ui/textarea"
+import { Label } from '../ui/label'
+import { useToast } from '@/hooks/use-toast'
+import { Checkbox } from '../ui/checkbox'
 
-const ListItemForm: React.FC<ListItemFormProps> = () => {
-  const [itemName, setItemName] = useState('');
-  const [description, setDescription] = useState('');
-  const [weight, setWeight] = useState('');
-  const [priceRange, setPriceRange] = useState('');
-  const [phoneLink, setPhoneLink] = useState('');
-  const [availabilityDate, setAvailabilityDate] = useState('');
+
+interface NewItem {
+  itemName: string
+  description: string
+  estimatedWeightKg: number
+  priceRangePerKg: string
+  contactLink: string
+  estimatedAvailability: string
+  status: boolean
+  userId: string
+}
+
+const CreateMarketplaceItem = () => {
+  const router = useRouter()
+  const { toast } = useToast()
+  const [formData, setFormData] = useState<NewItem>({
+    itemName: '',
+    description: '',
+    estimatedWeightKg: 0,
+    priceRangePerKg: '',
+    contactLink: '',
+    estimatedAvailability: '',
+    status: false,
+    userId: 'user-id-here',  // Replace with actual user ID
+  })
+
+  const mutation = useMutation({
+    mutationFn: (newItem: NewItem) => axios.post('/api/marketplace', newItem),
+    onSuccess: () => {
+      toast({
+        title: "Item Created",
+        description: "Your marketplace item has been successfully created.",
+      })
+      router.push('/dashboard/marketplace')
+    },
+    onError: (error) => {
+      toast({
+        title: "Error",
+        description: "There was an error creating your item. Please try again.",
+        variant: "destructive",
+      })
+      console.error('Error creating item:', error)
+    },
+  })
 
   const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    // Handle form submission logic here (e.g., send data to API)
-  };
+    e.preventDefault()
+    mutation.mutate(formData)
+  }
 
   return (
-    <form onSubmit={handleSubmit}>
-      <div className="space-y-4">
-        <div>
-          <label className="block font-medium ">Item Name</label>
-          <Input
-            type="text"
-            value={itemName}
-            onChange={(e) => setItemName(e.target.value)}
-            placeholder="e.g., Tomato"
-            className="w-full p-2 border rounded-md"
-            required
-          />
-        </div>
+    <Card className="w-full max-w-2xl mx-auto">
+      <CardHeader>
+        <CardTitle className='text-center'>Add a new item to the marketplace</CardTitle>
 
-        <div>
-          <label className="block font-medium ">Description</label>
-          <Textarea
-            value={description}
-            onChange={(e) => setDescription(e.target.value)}
-            placeholder="e.g., Fresh tomatoes from the farm"
-            className="w-full p-2 border rounded-md"
-            required
-          />
-        </div>
+      </CardHeader>
+      <CardContent>
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <div className="space-y-2">
+            <Label htmlFor="itemName">Item Name</Label>
+            <Input
+              id="itemName"
+              placeholder="Enter item name"
+              value={formData.itemName}
+              onChange={(e) => setFormData({ ...formData, itemName: e.target.value })}
+              required
+            />
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="description">Description</Label>
+            <Textarea
+              id="description"
+              placeholder="Describe your item"
+              value={formData.description}
+              onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+              required
+            />
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="estimatedWeightKg">Estimated Weight (kg)</Label>
+            <Input
+              id="estimatedWeightKg"
+              type="number"
+              placeholder="Enter estimated weight"
+              value={formData.estimatedWeightKg || ''}
+              onChange={(e) => setFormData({ ...formData, estimatedWeightKg: parseFloat(e.target.value) || 0 })}
+              required
+            />
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="priceRangePerKg">Price Range per kg</Label>
+            <Input
+              id="priceRangePerKg"
+              placeholder="e.g. 30-100rs"
+              value={formData.priceRangePerKg}
+              onChange={(e) => setFormData({ ...formData, priceRangePerKg: e.target.value })}
+              required
+            />
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="contactLink">Contact Number</Label>
+            <Input
+              id="contactLink"
+              type="tel"
+              placeholder="Enter contact number"
+              value={formData.contactLink}
+              onChange={(e) => setFormData({ ...formData, contactLink: e.target.value })}
+              required
+            />
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="estimatedAvailability">Estimated Availability</Label>
+            <Input
+              id="estimatedAvailability"
+              type="date"
+              value={formData.estimatedAvailability}
+              onChange={(e) => setFormData({ ...formData, estimatedAvailability: e.target.value })}
+              required
+            />
+          </div>
+          <div className="flex items-center space-x-2">
+            <Checkbox
+              id="status"
+              checked={formData.status}
+              onCheckedChange={(checked) => setFormData({ ...formData, status: checked as boolean })}
+            />
+            <Label htmlFor="status">Available</Label>
+          </div>
+        </form>
+      </CardContent>
+      <CardFooter>
+        <Button type="submit" onClick={handleSubmit} disabled={mutation.isPending}>
+          {mutation.isPending ? 'Creating...' : 'Create Item'}
+        </Button>
+      </CardFooter>
+    </Card>
+  )
+}
 
-        <div>
-          <label className="block font-medium ">Estimated Product Weight (kg)</label>
-          <Input
-            type="text"
-            value={weight}
-            onChange={(e) => setWeight(e.target.value)}
-            placeholder="e.g., 1000kg"
-            className="w-full p-2 border rounded-md"
-            required
-          />
-        </div>
-
-        <div>
-          <label className="block font-medium ">Estimated Price Range (per kg)</label>
-          <Input
-            type="text"
-            value={priceRange}
-            onChange={(e) => setPriceRange(e.target.value)}
-            placeholder="e.g., 60-100/kg"
-            className="w-full p-2 border rounded-md"
-            required
-          />
-        </div>
-
-        <div>
-          <label className="block font-medium ">Phone/WhatsApp Link</label>
-          <Input
-            type="text"
-            value={phoneLink}
-            onChange={(e) => setPhoneLink(e.target.value)}
-            placeholder="e.g., https://wa.me/1234567890"
-            className="w-full p-2 border rounded-md"
-            required
-          />
-        </div>
-
-        <div>
-          <label className="block font-medium ">Estimated Availability Date</label>
-          <Input
-            type="date"
-            value={availabilityDate}
-            onChange={(e) => setAvailabilityDate(e.target.value)}
-            className="w-full p-2 border rounded-md"
-            required
-          />
-        </div>
-
-        <button type="submit" className="w-full p-2 bg-green-500 text-white rounded-md">
-          List Item
-        </button>
-      </div>
-    </form>
-  );
-};
-
-export default ListItemForm;
+export default CreateMarketplaceItem
