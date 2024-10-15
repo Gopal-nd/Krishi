@@ -61,7 +61,7 @@ export const authOptions:NextAuthOptions={
             return '/'
         }
     },
-    secret:'secret'
+    secret:process.env.NEXTAUTH_SECRET!
 }
 
 

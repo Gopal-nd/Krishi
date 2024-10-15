@@ -11,6 +11,7 @@ import HourlyWeatherData from '@/components/weather/Hourlydata';
 import DailyForecast from '@/components/weather/DailyForcast';
 import { useToast } from '@/hooks/use-toast';
 import { WeatherData, WeatherDataHour } from '@/types/weather';
+import { Skeleton } from '@/components/ui/skeleton';
 
 function debounce(func: (...args: any[]) => void, delay: number) {
   let timeout: NodeJS.Timeout;
@@ -27,6 +28,7 @@ interface Location {
 }
 
 const Page = () => {
+
   const [location, setLocation] = useState<Location>({ latitude: null, longitude: null });
   const [geoError, setGeoError] = useState<string | null>(null);
   const [place, setPlace] = useState<string | null>(null);
@@ -167,6 +169,7 @@ const Page = () => {
   }
 
   return (
+    
     <div className='flex flex-col space-y-2'>
       <div className='flex justify-between items-center px-4 w-[90%] mx-auto border-b pb-2'>
         <div className='flex gap-4'>
@@ -244,6 +247,8 @@ const Page = () => {
         </div>
       )}
     </div>
+
+
   );
 };
 

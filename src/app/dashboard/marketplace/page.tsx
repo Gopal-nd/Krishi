@@ -1,11 +1,19 @@
+
+'use client'
 import { FC } from 'react';
-import { ShoppingCart, Store } from 'lucide-react';  // Import Lucide icons
+import { ArrowBigLeft, ShoppingCart, Store } from 'lucide-react';  // Import Lucide icons
 import Link from 'next/link';
+import { Button } from '@/components/ui/button';
+import { useRouter } from 'next/navigation';
 
 const Marketplace: FC = () => {
+  const router = useRouter();
   return (
-    <div className="min-h-screen flex flex-col items-center justify-evenly  py-6">
+    <>
+      <Button className='' onClick={() => router.back()}><ArrowBigLeft /></Button>
+    <div className="min-h-[80vh] flex flex-col items-center justify-evenly  py-6">
       {/* Heading */}
+
       <h1 className="text-4xl font-bold ">Welcome Back to the Market Place</h1>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-10 w-full max-w-4xl px-4">
@@ -28,6 +36,7 @@ const Marketplace: FC = () => {
         </Link>
       </div>
     </div>
+    </>
   );
 };
 
