@@ -61,9 +61,7 @@ const ImageRecognitionPage = () => {
   if (isError) {
     console.log(error);
   }
-  // if (AIresponse?.status !== 200) {
-  //   alert(AIresponse?.data?.error);
-  // }
+ 
   if (AIresponse?.status === 300) {
     alert(AIresponse?.data?.error);
   }

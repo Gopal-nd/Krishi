@@ -1,255 +1,161 @@
-'use client';
-import { Button } from '@/components/ui/button';
-import { ArrowLeft, LocateFixed, MapPin, Search } from 'lucide-react';
-import { Input } from '@/components/ui/input';
-import React, { useCallback, useEffect, useState } from 'react';
-import { useRouter } from 'next/navigation';
-import axios from 'axios';
-import { useQuery } from '@tanstack/react-query';
-import WeatherComponent from '@/components/weather/detailsToday';
-import HourlyWeatherData from '@/components/weather/Hourlydata';
-import DailyForecast from '@/components/weather/DailyForcast';
-import { useToast } from '@/hooks/use-toast';
-import { WeatherData, WeatherDataHour } from '@/types/weather';
-import { Skeleton } from '@/components/ui/skeleton';
+'use client'
+
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
+import { Skeleton } from '@/components/ui/skeleton'
+import { useToast } from '@/hooks/use-toast'
+import { WeatherData, WeatherDataHour } from '@/types/weather'
+import { useQuery } from '@tanstack/react-query'
+import axios from 'axios'
+import { ArrowLeft, LocateFixed, MapPin, Search } from 'lucide-react'
+import { useRouter } from 'next/navigation'
+import React, { useCallback, useEffect, useState } from 'react'
+import WeatherComponent from '@/components/weather/detailsToday'
+import HourlyWeatherData from '@/components/weather/Hourlydata'
+import DailyForecast from '@/components/weather/DailyForcast'
+import { useSession } from 'next-auth/react'
 
 function debounce(func: (...args: any[]) => void, delay: number) {
-  let timeout: NodeJS.Timeout;
+  let timeout: NodeJS.Timeout
   return (...args: any[]) => {
-    clearTimeout(timeout);
-    timeout = setTimeout(() => func(...args), delay);
-  };
+    clearTimeout(timeout)
+    timeout = setTimeout(() => func(...args), delay)
+  }
 }
-
 
 interface Location {
-  latitude: number | null;
-  longitude: number | null;
+  latitude: number | null
+  longitude: number | null
 }
 
-const Page = () => {
+const fetchWeatherData = async (params: { lat?: number; lon?: number; q?: string }) => {
+  const { data } = await axios.get('https://api.openweathermap.org/data/2.5/weather', {
+    params: { ...params, appid: process.env.NEXT_PUBLIC_WEATHER_API, units: 'metric' },
+  })
+  return data
+}
 
-  const [location, setLocation] = useState<Location>({ latitude: null, longitude: null });
-  const [geoError, setGeoError] = useState<string | null>(null);
-  const [place, setPlace] = useState<string | null>(null);
-  console.log(place);
-  const router = useRouter();
-  const { toast } = useToast();
+const fetchHourlyData = async (params: { lat?: number; lon?: number; q?: string }) => {
+  const { data } = await axios.get('https://api.openweathermap.org/data/2.5/forecast', {
+    params: { ...params, appid: process.env.NEXT_PUBLIC_WEATHER_API, units: 'metric' },
+  })
+  return data.list
+}
 
-  // Get user geolocation
-  function GetUserGeoLocation() {
-    if (location.latitude || location.longitude) return; // Prevent repeated calls
+export default function WeatherPage() {
+  const [location, setLocation] = useState<Location>({ latitude: null, longitude: null })
+  const [place, setPlace] = useState<string | null>(null)
+  const router = useRouter()
+  const { toast } = useToast()
+  const user = useSession()
+  if(!user.data?.user){
+    router.push('/login')
+    return
+  }
+
+  const getUserLocation = useCallback(() => {
+    if (location.latitude || location.longitude) return
     if (typeof window !== 'undefined' && 'geolocation' in navigator) {
       navigator.geolocation.getCurrentPosition(
         (position: GeolocationPosition) => {
-          const { latitude, longitude } = position.coords;
-          setLocation({ latitude, longitude });
+          const { latitude, longitude } = position.coords
+          setLocation({ latitude, longitude })
         },
         (error: GeolocationPositionError) => {
-          setGeoError(error.message);
+          toast({
+            title: 'Location Error',
+            description: error.message,
+            variant: 'destructive',
+          })
         }
-      );
+      )
     } else {
-      setGeoError('Geolocation is not supported by your browser');
+      toast({
+        title: 'Location Error',
+        description: 'Geolocation is not supported by your browser',
+        variant: 'destructive',
+      })
     }
-  }
+  }, [location.latitude, location.longitude, toast])
 
-  // Fetch location data
-  const fetchLocationDataPlace = async (place: string) => {
-    const { data, status } = await axios.get(
-      `https://api.openweathermap.org/data/2.5/weather?q=${place}&appid=${process.env.NEXT_PUBLIC_WEATHER_API}&units=metric`
-    );
-    if (status !== 200) {
-      throw new Error('Failed to fetch location data');
-    }
-
-    return data;
-  };
-
-  // Fetch hourly weather data
-  const fetchWeatherHourlydataPlace = async (place: string) => {
-    const { data, status } = await axios.get(
-      `https://api.openweathermap.org/data/2.5/forecast?q=${place}&appid=${process.env.NEXT_PUBLIC_WEATHER_API}&units=metric`
-    );
-    if (status !== 200) {
-      throw new Error('Failed to fetch hourly data');
-    }
-    return data.list;
-  };
-  const fetchLocationData = async (latitude: number, longitude: number) => {
-    const { data, status } = await axios.get(
-      `https://api.openweathermap.org/data/2.5/weather?lat=${latitude}&lon=${longitude}&appid=${process.env.NEXT_PUBLIC_WEATHER_API}&units=metric`
-    );
-    if (status !== 200) {
-      throw new Error('Failed to fetch location data');
-    }
-    return data;
-  };
-
-  // Fetch hourly weather data
-  const fetchWeatherHourlydata = async (latitude: number, longitude: number) => {
-    const { data, status } = await axios.get(
-      `https://api.openweathermap.org/data/2.5/forecast?lat=${latitude}&lon=${longitude}&appid=${process.env.NEXT_PUBLIC_WEATHER_API}&units=metric`
-    );
-    if (status !== 200) {
-      throw new Error('Failed to fetch hourly data');
-    }
-    return data.list;
-  };
-
-  // Queries for location and hourly weather data
-  const { data, isLoading, isError, error: queryError } = useQuery<WeatherData>({
-    queryKey: ['location', location],
-    queryFn: () => {
-      if (!location.latitude || !location.longitude) {
-        throw new Error('Location is not defined');
-      }
-      return fetchLocationData(location.latitude!, location.longitude!);
-    },
-    enabled: !!location.latitude && !!location.longitude, // Only run if location is available
-  });
-
-  const { data: Hourdata, isLoading: HourLoading, isError: HourisError } = useQuery<WeatherDataHour[]>({
-    queryKey: ['Hourly', location],
-    queryFn: () => {
-      if (!location.latitude || !location.longitude) {
-        throw new Error('Location is not defined');
-      }
-      return fetchWeatherHourlydata(location.latitude!, location.longitude!);
-    },
-    enabled: !!location.latitude && !!location.longitude, // Only run if location is available
-  });
-  const { data:Placedata, isLoading: PlaceLoading,refetch:PlaceRefetch, isError: PlaceisError, error: PlacequeryError } = useQuery<WeatherData>({
-    queryKey: ['place', place],
-    queryFn: () => {
-      if (!place) {
-        throw new Error('place is not defined');
-      }
-      return fetchLocationDataPlace(place);
-    },
-    enabled: !!place, // Only run if location is available
-  });
-
-  const { data: PlaceHourdata, isLoading: PlaceHourLoading, refetch:HourlyPlaceRefetch, isError: PlaceHourisError } = useQuery<WeatherDataHour[]>({
-    queryKey: ['place hourly', place],
-    queryFn: () => {
-      if (!place) {
-        throw new Error('place is not defined');
-      }
-      return fetchWeatherHourlydataPlace(place);
-    },
-    enabled: !!place, // Only run if location is available
-  });
-
-  console.log( "place weatherdata",Placedata);
-  console.log("place weatherdata Hourly",PlaceHourdata);
-
-  const searchTheLocation = useCallback(
-    debounce(() => {
-      if (!place) return;
-      HourlyPlaceRefetch();
-      PlaceRefetch();
-    }, 500), // Debounce with 500ms delay
-    [place]
-  );
-  // Use effect to get geolocation on initial render
   useEffect(() => {
-    GetUserGeoLocation();
-    
-  }, []);
+    getUserLocation()
+  }, [getUserLocation])
 
-  // Display error messages if geolocation fails
-  if (isError) {
-    toast({
-      title: 'Location Error',
-      description: geoError || (queryError as Error)?.message,
-      variant: 'destructive',
-      duration: 5000,
-    });
-  }
+  const { data: weatherData, isLoading: weatherLoading } = useQuery<WeatherData>({
+    queryKey: ['weather', location, place],
+    queryFn: () => fetchWeatherData(place ? { q: place } : { lat: location.latitude!, lon: location.longitude! }),
+    enabled: !!(place || (location.latitude && location.longitude)),
+  })
+
+  const { data: hourlyData, isLoading: hourlyLoading } = useQuery<WeatherDataHour[]>({
+    queryKey: ['hourly', location, place],
+    queryFn: () => fetchHourlyData(place ? { q: place } : { lat: location.latitude!, lon: location.longitude! }),
+    enabled: !!(place || (location.latitude && location.longitude)),
+  })
+
+  const searchLocation = useCallback(
+    debounce(() => {
+      if (!place) return
+      setLocation({ latitude: null, longitude: null })
+    }, 500),
+    [place]
+  )
 
   return (
-    
-    <div className='flex flex-col space-y-2'>
-      <div className='flex justify-between items-center px-4 w-[90%] mx-auto border-b pb-2'>
-        <div className='flex gap-4'>
-          <ArrowLeft className='h-5 w-5 hover:bg-slate-500 rounded-md' onClick={() => router.back()} />
-          <div className='space-x-2 flex items-center'>
-            <MapPin />
-            <span>{place ?  Placedata?.name : data?.name}</span>
+    <div className='flex flex-col space-y-4'>
+      <header className='flex justify-between items-center px-4 w-full mx-auto border-b pb-2'>
+        <div className='flex items-center gap-4'>
+          <Button variant="ghost" size="icon" onClick={() => router.back()}>
+            <ArrowLeft className='h-5 w-5' />
+          </Button>
+          <div className='flex items-center gap-2'>
+            <MapPin className='h-5 w-5' />
+            <span>{weatherData?.name || 'Loading...'}</span>
           </div>
         </div>
-        <div>
-          <div className="flex items-center">
-            <LocateFixed
-              className={`mr-2 w-10 h-10 ${location.latitude ? 'text-green-500' : 'text-red-500'}`}
-              onClick={GetUserGeoLocation}
-            />
-            <Input type="text" placeholder="Search location..." onChange={(e) => setPlace(e.target.value)} value={place??''} className="mr-2" />
-            <Button size="icon" onClick={()=> searchTheLocation()}>
-              <Search className="h-4 w-4" />
-            </Button>
-          </div>
+        <div className='flex items-center gap-2'>
+          <Button variant="ghost" size="icon" onClick={getUserLocation}>
+            <LocateFixed className={`h-5 w-5 ${location.latitude ? 'text-green-500' : 'text-red-500'}`} />
+          </Button>
+          <Input
+            type="text"
+            placeholder="Search location..."
+            onChange={(e) => setPlace(e.target.value)}
+            value={place ?? ''}
+            className="w-40 md:w-60"
+          />
+          <Button size="icon" onClick={searchLocation}>
+            <Search className="h-4 w-4" />
+          </Button>
         </div>
-      </div>
+      </header>
 
-
-    {!location.latitude && !location.longitude && !place && (
-      <p className='text-center text-xl p-4'>Allow the Loction access or <span className='text-green-500 font-bold'>Search a location</span></p>)}
-
-
-      {isLoading && <p className='text-center text-xl p-4'>Weather data is loading...</p>}
-      {isError && <p className='text-center text-xl p-4'>{geoError || (queryError as Error)?.message}</p>}
-
-      {data && (
-        <div className='w-[90%] mx-auto'>
-          
-          <WeatherComponent weatherData={data} />
-        </div>
-      )}
-      {PlaceLoading && <p className='text-center text-xl p-4'>Place data is loading...</p>}
-{    !place &&(<>
-      {Placedata && (
-        <div className='w-[90%] mx-auto'>
-          
-          <WeatherComponent weatherData={ Placedata} />
-        </div>
-      )}
-</>)  
-} 
-     {HourLoading && <p className='text-center text-xl p-4'>Hourly data is loading...</p>}
-   { !place && (<>
-    {Hourdata && (
-      <div className='w-[90%] mx-auto'>
-          <HourlyWeatherData HourlyWeatherData={Hourdata} />
-        </div>
-      )}
-      </>) 
-      }
-      {PlaceHourdata && (
-        <div className='w-[90%] mx-auto'>
-          <HourlyWeatherData HourlyWeatherData={PlaceHourdata} />
-        </div>
+      {!weatherData && !place && (
+        <p className='text-center text-xl p-4'>
+          Allow location access or <span className='text-green-500 font-bold'>search for a location</span>
+        </p>
       )}
 
-{!place &&(<>
-      {(Hourdata || data) && (
-        <div className='w-[90%] mx-auto'>
-          <DailyForecast />
-        </div>
-      )}
-      </>)
-      
-      }
-      {( PlaceHourdata|| Placedata) && (
-        <div className='w-[90%] mx-auto'>
+      {(weatherLoading || hourlyLoading) && <WeatherSkeleton />}
+
+      {weatherData && (
+        <div className='w-[90%] mx-auto space-y-4'>
+          <WeatherComponent weatherData={weatherData} />
+          {hourlyData && <HourlyWeatherData HourlyWeatherData={hourlyData} />}
           <DailyForecast />
         </div>
       )}
     </div>
+  )
+}
 
-
-  );
-};
-
-export default Page;
+function WeatherSkeleton() {
+  return (
+    <div className='w-[90%] mx-auto space-y-4'>
+      <Skeleton className='h-40 w-full' />
+      <Skeleton className='h-60 w-full' />
+      <Skeleton className='h-80 w-full' />
+    </div>
+  )
+}

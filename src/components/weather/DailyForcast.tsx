@@ -446,7 +446,7 @@ const weatherData= data.list;
 const DailyForecast = () => {
     return (
         <div className="p-2 pt-4 border-t rounded-lg shadow-md max-w-5xl mx-auto">
-            <h2 className="text-xl font-semibold mb-4 ">Daily Forecast</h2>
+            <h2 className="text-xl font-semibold mb-4 ">Daily Forecast (fake)</h2>
         <div className="p-4 space-y-4">
       {weatherData.map((dayData, index) => (
         <div

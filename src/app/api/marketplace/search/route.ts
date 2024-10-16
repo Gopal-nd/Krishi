@@ -40,7 +40,3 @@ export async function GET(req: Request) {
   }
 }
 
-// Export a catch-all handler to allow only GET requests
-export const config = {
-  methods: ['GET'],
-}

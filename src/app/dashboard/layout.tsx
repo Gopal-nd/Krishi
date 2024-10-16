@@ -64,7 +64,6 @@ export default function Component({ children }: { children: React.ReactNode }) {
       </div>
     </nav>
   )
-
   return (
     <div className="min-h-screen max-w-7xl mx-auto">
       <header className="flex items-center justify-between p-2 border-b">
