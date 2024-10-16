@@ -6,8 +6,16 @@ import { NextResponse } from 'next/server';
 
 // GET: Fetch all marketplace items
 export async function GET() {
+  const user = await getAuthSession()
+  if(!user){
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  }
   try {
-    const items = await db.marketplaceItem.findMany();
+    const items = await db.marketplaceItem.findMany({
+      where: {
+        userId: user.user.id
+      }
+    });
     return NextResponse.json(items);
   } catch (error) {
     return NextResponse.json({ error: 'Failed to fetch items' }, { status: 500 });

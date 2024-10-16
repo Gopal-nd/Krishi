@@ -1,35 +1,34 @@
-'use client'
-import { useState } from "react";
-import { Input } from "../ui/input";
-import { Button } from "../ui/button";
+import { useState } from 'react'
+import { Input } from "@/components/ui/input"
+import { Button } from "@/components/ui/button"
+import { Search } from 'lucide-react'
 
 interface SearchBarProps {
-    onSearch: (term: string) => void;
+  onSearch: (query: string) => void
+}
+
+const SearchBar: React.FC<SearchBarProps> = ({ onSearch }) => {
+  const [query, setQuery] = useState('')
+
+  const handleSearch = (e: React.FormEvent) => {
+    e.preventDefault()
+    onSearch(query)
   }
-  
-  const SearchBar: React.FC<SearchBarProps> = ({ onSearch }) => {
-    const [searchTerm, setSearchTerm] = useState('');
-  
-    const handleSearch = (e: React.FormEvent) => {
-      e.preventDefault();
-      onSearch(searchTerm);
-    };
-  
-    return (
-      <form onSubmit={handleSearch} className="flex space-x-2">
-        <Input
-          type="text"
-          value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
-          placeholder="Search for items..."
-          className="w-full p-2 border rounded-md"
-        />
-        <Button type="submit" className="p-2 bg-blue-500 text-white hover:bg-blue-900 rounded-md">
-          Search
-        </Button>
-      </form>
-    );
-  };
-  
-  export default SearchBar;
-  
+
+  return (
+    <form onSubmit={handleSearch} className="flex w-full max-w-sm items-center space-x-2 mb-4">
+      <Input
+        type="text"
+        placeholder="Search items..."
+        value={query}
+        onChange={(e) => setQuery(e.target.value)}
+      />
+      <Button type="submit">
+        <Search className="h-4 w-4 mr-2" />
+        Search
+      </Button>
+    </form>
+  )
+}
+
+export default SearchBar

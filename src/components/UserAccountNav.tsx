@@ -30,7 +30,7 @@ const UserAccounNav: FC<UserAccounNavProps> = ({ user }) => {
         </div>
         <DropdownMenuSeparator />
         <DropdownMenuItem asChild>
-          <Link href={`/dashboard/details`}>Your Details</Link>
+          <Link href={`/dashboard/details`}>My Listings</Link>
         </DropdownMenuItem>
         <DropdownMenuSeparator />
         <DropdownMenuItem onSelect={(event)=>{
