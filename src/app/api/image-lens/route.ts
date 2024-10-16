@@ -73,28 +73,10 @@ export async function POST(request:any) {
       return NextResponse.json({ error: 'No file uploaded' }, { status: 400 });
     }
 
+    console.log("file is type", file.type);
     const bytes = await file.arrayBuffer();
     const buffer = Buffer.from(bytes);
 
-    // Ensure the public directory exists
-    const publicDir = join(process.cwd(), 'public', 'uploads');
-    try {
-      await mkdir(publicDir, { recursive: true });
-    } catch (err) {
-      if (err && err!== 'EEXIST') {
-        console.error('Error creating upload directory:', err);
-        return NextResponse.json({ error: 'Error creating upload directory' }, { status: 500 });
-      }
-    }
-
-    // Save the file to the public directory
-    const fileName = `${Date.now()}-${file.name}`;
-    const path = join(publicDir, fileName);
-    await writeFile(path, buffer);
-
-    console.log('Received text:', text);
-    console.log('Received image file:', fileName);
-    console.log('File saved at:', path);
 
     // Process with Gemini AI
     const imagePart = fileToGenerativePart(buffer, file.type);
@@ -103,17 +85,6 @@ export async function POST(request:any) {
 
     console.log('AI Response:', aiResponse);
 
-
-    // Clean up uploaded files
-    const files = await readdir(publicDir);
-    for (const file of files) {
-      const filePath = join(publicDir, file);
-      try {
-        await unlink(filePath);
-      } catch (err) {
-        console.error('Error deleting file:', err);
-      }
-    }
 
 
     if (!aiResponse) {

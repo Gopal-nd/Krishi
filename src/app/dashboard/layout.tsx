@@ -23,7 +23,6 @@ export default function Component({ children }: { children: React.ReactNode }) {
     setIsSidebarOpen(!isSidebarOpen)
   }
 
-  // Close sidebar when a link is clicked
   const handleLinkClick = () => {
     if (!isLargeScreen) setIsSidebarOpen(false)
   }

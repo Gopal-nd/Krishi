@@ -13,7 +13,7 @@ import React, { useCallback, useEffect, useState } from 'react'
 import WeatherComponent from '@/components/weather/detailsToday'
 import HourlyWeatherData from '@/components/weather/Hourlydata'
 import DailyForecast from '@/components/weather/DailyForcast'
-import { useSession } from 'next-auth/react'
+
 
 function debounce(func: (...args: any[]) => void, delay: number) {
   let timeout: NodeJS.Timeout
@@ -47,11 +47,6 @@ export default function WeatherPage() {
   const [place, setPlace] = useState<string | null>(null)
   const router = useRouter()
   const { toast } = useToast()
-  const user = useSession()
-  if(!user.data?.user){
-    router.push('/login')
-    return
-  }
 
   const getUserLocation = useCallback(() => {
     if (location.latitude || location.longitude) return
